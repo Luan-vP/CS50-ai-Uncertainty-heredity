@@ -142,13 +142,14 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         * everyone in set `have_trait` has the trait, and
         * everyone not in set` have_trait` does not have the trait.
     """
-    
+    # Debugging prints
+    print('print(people) -')
     print(people)
-    print('print(one_gene)')
+    print('print(one_gene) -')
     print(one_gene)
-    print('print(two_genes)')
+    print('print(two_genes) -')
     print(two_genes)
-    print('print(have_trait)')
+    print('print(have_trait) -')
     print(have_trait)
 
     # calculte probs and move people into this set, so we can do the parents first
@@ -158,14 +159,21 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         if people[person]['mother'] is None and people[person]['father'] is None:
             # Top level, therefore calculate from standard probs
 
+            # TODO am I adding these right?
+
             # Adding from PROBS dictionary
             running_prob = 0
+
             if person in one_gene:
-                running_prob += PROBS[gene][1]
+                running_prob += ( PROBS['gene'][1] * PROBS['trait'][1][person in have_trait] )
             elif person in two_genes:
-                running_prob += PROBS[gene][2]
+                running_prob += ( PROBS['gene'][2] * PROBS['trait'][2][person in have_trait] )
             else:
-                running_prob += PROBS[gene][0]
+                running_prob += ( PROBS['gene'][0] * PROBS['trait'][0][person in have_trait] )
+
+            # TODO: Now for the children
+            
+        
 
 
                 
