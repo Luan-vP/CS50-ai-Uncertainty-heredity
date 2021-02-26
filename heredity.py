@@ -150,11 +150,13 @@ def joint_probability(people, one_gene, two_genes, have_trait):
     print(two_genes)
     print('print(have_trait)')
     print(have_trait)
+
+    # calculte probs and move people into this set, so we can do the parents first
     calculated = set()
 
     for person in people:
         if people[person]['mother'] is None and people[person]['father'] is None:
-            # top level therefore calculate from standard probs
+            # Top level, therefore calculate from standard probs
 
             # Adding from PROBS dictionary
             running_prob = 0
