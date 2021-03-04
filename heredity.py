@@ -1,6 +1,7 @@
 import csv
 import itertools
 import sys
+import numpy
 
 PROBS = {
 
@@ -35,6 +36,41 @@ PROBS = {
     # Mutation probability
     "mutation": 0.01
 }
+
+# Matrix for probabilities of children inheriting genes from their parents
+
+# TODO: Check these ->
+
+n = 3
+heredity_matrix = numpy.zeros((n,n,n))
+
+heredity_matrix[0][0][0] = ( 1 - PROBS['mutation'] ) * ( 1 - PROBS['mutation'] )
+heredity_matrix[0][0][1] = 2 * ( 1 - PROBS['mutation'] ) * ( PROBS['mutation'] )
+heredity_matrix[0][0][2] = ( PROBS['mutation'] ) * ( PROBS['mutation'] )
+heredity_matrix[0][1][0] = ( 1 - PROBS['mutation'] ) * ( 0.5 )
+heredity_matrix[0][1][1] = ( 1 - PROBS['mutation'] ) * ( 0.5 ) + (PROBS['mutation'] ) * ( 0.5 )
+heredity_matrix[0][1][2] = ( PROBS['mutation'] ) * ( 0.5 )
+heredity_matrix[0][2][0] = ( 1 - PROBS['mutation'] ) * ( PROBS['mutation'] )
+heredity_matrix[0][2][1] = ( 1 - PROBS['mutation'] ) * ( 1 - PROBS['mutation'] ) + ( PROBS['mutation'] ) * ( PROBS['mutation'] )
+heredity_matrix[0][2][2] = ( PROBS['mutation'] ) * ( 1 - PROBS['mutation'] )
+heredity_matrix[1][0][0] = heredity_matrix[0][1][0]
+heredity_matrix[1][0][1] = heredity_matrix[0][1][1]
+heredity_matrix[1][0][2] = heredity_matrix[0][1][2]
+heredity_matrix[1][1][0] = 0.5 * 0.5
+heredity_matrix[1][1][1] = 2 * 0.5 * 0.5
+heredity_matrix[1][1][2] = 0.5 * 0.5
+heredity_matrix[1][2][0] = ( 0.5 ) * ( PROBS['mutation'] )
+heredity_matrix[1][2][1] = ( 0.5 ) * ( 1 - PROBS['mutation'] ) + ( 0.5 ) * ( PROBS['mutation'] )
+heredity_matrix[1][2][2] = ( 0.5 ) * ( 1 - PROBS['mutation'] )
+heredity_matrix[2][0][0] = heredity_matrix[0][2][0]
+heredity_matrix[2][0][1] = heredity_matrix[0][2][1]
+heredity_matrix[2][0][2] = heredity_matrix[0][2][2]
+heredity_matrix[2][1][0] = heredity_matrix[1][2][0]
+heredity_matrix[2][1][1] = heredity_matrix[1][2][1]
+heredity_matrix[2][1][2] = heredity_matrix[1][2][2]
+heredity_matrix[2][2][0] = ( PROBS['mutation'] ) * ( PROBS['mutation'] )
+heredity_matrix[2][2][1] = 2 * ( PROBS['mutation'] ) * ( 1 - PROBS['mutation'] )
+heredity_matrix[2][2][2] = ( 1 - PROBS['mutation'] ) * ( 1 - PROBS['mutation'] )
 
 
 def main():
@@ -142,6 +178,7 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         * everyone in set `have_trait` has the trait, and
         * everyone not in set` have_trait` does not have the trait.
     """
+
     # Debugging prints
     print('print(people) -')
     print(people)
@@ -152,27 +189,54 @@ def joint_probability(people, one_gene, two_genes, have_trait):
     print('print(have_trait) -')
     print(have_trait)
 
-    # calculte probs and move people into this set, so we can do the parents first
-    calculated = set()
+    joint_prob = 0
 
     for person in people:
-        if people[person]['mother'] is None and people[person]['father'] is None:
-            # Top level, therefore calculate from standard probs
-
-            # TODO am I adding these right?
-
-            # Adding from PROBS dictionary
-            running_prob = 0
+        if people[person]['mother'] is None:
+            print("people[person]['mother'] is None:")
+            # Top level, Adding from PROBS dictionary
 
             if person in one_gene:
-                running_prob += ( PROBS['gene'][1] * PROBS['trait'][1][person in have_trait] )
+                joint_prob += ( PROBS['gene'][1] * PROBS['trait'][1][person in have_trait] )
             elif person in two_genes:
-                running_prob += ( PROBS['gene'][2] * PROBS['trait'][2][person in have_trait] )
+                joint_prob += ( PROBS['gene'][2] * PROBS['trait'][2][person in have_trait] )
             else:
-                running_prob += ( PROBS['gene'][0] * PROBS['trait'][0][person in have_trait] )
-
-            # TODO: Now for the children
+                joint_prob += ( PROBS['gene'][0] * PROBS['trait'][0][person in have_trait] )
             
+        elif people[person]['mother'] is not None:
+            print("people[person]['mother'] is not None:")
+
+            mother = people[person]['mother']
+            father = people[person]['father']
+            
+            if mother in one_gene:
+                mother_index = 1
+            elif mother in two_genes:
+                mother_index = 2
+            else:
+                mother_index = 0
+
+            if father in one_gene:
+                father_index = 1
+            elif father in two_genes:
+                father_index = 2
+            else:
+                father_index = 0
+
+            if person in one_gene:
+                person_index = 1
+            elif person in two_genes:
+                person_index = 2
+            else:
+                person_index = 0
+
+            heredity_probability = heredity_matrix[mother_index][father_index][person_index]
+
+            print("print(heredity_probability)")
+            print(heredity_probability)
+
+            
+        # TODO: Now to combine the probabilities for each person
         
 
 
