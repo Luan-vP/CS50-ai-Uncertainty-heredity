@@ -189,19 +189,23 @@ def joint_probability(people, one_gene, two_genes, have_trait):
     print('print(have_trait) -')
     print(have_trait)
 
-    joint_prob = 0
+    joint_p = 1
 
     for person in people:
+        print("print(person)")
+        print(person)
+        individual_probability = 0
+
         if people[person]['mother'] is None:
             print("people[person]['mother'] is None:")
             # Top level, Adding from PROBS dictionary
 
             if person in one_gene:
-                joint_prob += ( PROBS['gene'][1] * PROBS['trait'][1][person in have_trait] )
+                individual_probability = ( PROBS['gene'][1] * PROBS['trait'][1][person in have_trait] )
             elif person in two_genes:
-                joint_prob += ( PROBS['gene'][2] * PROBS['trait'][2][person in have_trait] )
+                individual_probability = ( PROBS['gene'][2] * PROBS['trait'][2][person in have_trait] )
             else:
-                joint_prob += ( PROBS['gene'][0] * PROBS['trait'][0][person in have_trait] )
+                individual_probability = ( PROBS['gene'][0] * PROBS['trait'][0][person in have_trait] )
             
         elif people[person]['mother'] is not None:
             print("people[person]['mother'] is not None:")
@@ -235,13 +239,23 @@ def joint_probability(people, one_gene, two_genes, have_trait):
             print("print(heredity_probability)")
             print(heredity_probability)
 
+            # TODO: combine with trait probability
+
+            if person in one_gene:
+                individual_probability = heredity_probability * PROBS['trait'][1][person in have_trait]
+            elif person in two_genes:
+                individual_probability = heredity_probability * PROBS['trait'][2][person in have_trait]
+            else:
+                individual_probability = heredity_probability * PROBS['trait'][0][person in have_trait]
             
-        # TODO: Now to combine the probabilities for each person
-        
+        print("print(individual_probability)")
+        print(individual_probability)
 
+        joint_p *= individual_probability
+        print("print(joint_probability)")
+        print(joint_p)
 
-                
-
+        return joint_p
 
 
 def update(probabilities, one_gene, two_genes, have_trait, p):
@@ -251,7 +265,21 @@ def update(probabilities, one_gene, two_genes, have_trait, p):
     Which value for each distribution is updated depends on whether
     the person is in `have_gene` and `have_trait`, respectively.
     """
-    raise NotImplementedError
+
+    print("inside update: p")
+    print(p)
+
+    for person in probabilities:
+
+        if person in one_gene:
+            probabilities[person]['gene'][1] += p
+        elif person in two_genes:
+            probabilities[person]['gene'][2] += p
+        else:
+            probabilities[person]['gene'][0] += p
+
+        probabilities[person]['trait'][person in have_trait] += p
+
 
 
 def normalize(probabilities):
